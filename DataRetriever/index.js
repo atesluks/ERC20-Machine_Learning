@@ -18,6 +18,7 @@ const httpOptions = {
 
 // A method that sends an HTTP request to the CoinAPI
 const retriveData = (token, startDate) => {
+    console.log(`Fetching data for ${token}`);
     const url = `http://rest.coinapi.io/v1/ohlcv/${token}/ETH/history?period_id=1HRS&time_start=${startDate}&time_end=2021-07-01T00:00:00`;
     return axios.get(url, httpOptions).catch(error => {
         console.error('ERROR when sending a request');
@@ -54,28 +55,32 @@ const startRetrievingData = async () => {
 
     //start loop
     const token = TOKENS[i];
+    for (let i=0; i<TOKENS.length; i++) {
+        const token = TOKENS[i];
 
-    let currentStartDate = START_DATE;
-
-    // Sending requests until all data till 1st of July 2021 is retrievid
-    while (currentStartDate !== START_DATE) {
-        // console.log(`Retrieving for this date ${currentStartDate}`);
-        const result = await retriveData(token, currentStartDate);
-        if (result) {
-            currentStartDate = await parseAndSaveData(`DataFiles2/${token}.txt`, result);
-            // console.log(`--- lastEndDate = ${currentStartDate}`);
-            if (!currentStartDate) {
-                // console.log('Error when appending data');
-                // console.log(`Finished at ${token} with currentStartDate=${currentStartDate}`);
-                return;
+        let currentStartDate = START_DATE;
+        let start=true;
+    
+        // Sending requests until all data till 1st of July 2021 is retrievid
+        while (currentStartDate !== START_DATE || start) {
+            // Retrieving data
+            const result = await retriveData(token, currentStartDate);
+            if (result) {
+                // Parsing and saving the results in a file
+                currentStartDate = await parseAndSaveData(`DataFiles/${token}.txt`, result);
+                start = false;
+                // Quiting the program if an error occured
+                if (!currentStartDate) {
+                    return;
+                }
+            } else {
+                // Selecting new API key
+                currAPIKeyIndex++;
+                httpOptions.headers = { 'X-CoinAPI-Key': API_KEYS[currAPIKeyIndex] };
             }
-        } else {
-            // Selecting new API key
-            currAPIKeyIndex++;
-            httpOptions.headers = { 'X-CoinAPI-Key': API_KEYS[currAPIKeyIndex] };
         }
-    }
+    }    
 };
 
-// Script launsher
+// Script launcher
 startRetrievingData();
