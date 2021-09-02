@@ -1,5 +1,5 @@
-# ERC20-Machine_Learning
-Masters project for analyzing ERC20 tokens data with different Machine Learning models
+# Comparison of Machine Learning Models for ERC20 Token Price
+Masters project for analyzing which machine learning models perform better in terms of predicting ERC20 token prices
 
 The data retriever code is located here: https://github.com/atesliuk/ERC20-Machine_Learning/tree/master/DataRetriever
 
